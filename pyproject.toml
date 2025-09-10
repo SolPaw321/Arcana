@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools", "numpy", "pandas"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "arcana-trading"
+version = "0.0.0"
+description = "Trading framework with Python and C-accelerated indicators"
+author = { name = "Paweł Solarcyk", email = "pawel.solarczyk@proton.me" }
+license = { file = "LICENSE" }
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=2.3",
+    "pandas>=2.3",
+]
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: C",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[tool.setuptools]
+packages = ["arcana"]
