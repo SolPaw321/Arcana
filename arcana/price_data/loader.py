@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
-from pandas import DataFrame, to_datetime, concat, read_csv
-from collections.abc import Iterable
+from pandas import DataFrame, to_datetime, read_csv
 
 from arcana.price_data.cfg import CSVCfg, TradingViewCfg, CCTXCfg
 from arcana.price_data.adapters import tv_interval_adapter, ccxt_symbol_adapter, ccxt_interval_adapter
@@ -27,9 +26,10 @@ def _normalize_columns(df: DataFrame) -> DataFrame:
     df = df.reindex(columns=list(COLUMN_ORDER.values()))
     return df
 
-def _create_df_from_raw_array(raw_data: DataFrame) -> DataFrame:
+def _create_df_from_raw_array(raw_data: DataFrame, symbol: str) -> DataFrame:
     df = DataFrame(raw_data, columns=["date", "open", "high", "low", "close", "volume"])
     df["date"] = to_datetime(df['date'], unit="ms")
+    df["symbol"] = symbol
     df.set_index("date", drop=True, inplace=True)
     return df
 
@@ -37,13 +37,13 @@ class PriceDataLoader(ABC):
     """The main factory for loading OHLCV data."""
 
     __slots__ = ()
-    _registry = RegistryTree("PriceData")
+    registry = RegistryTree("PriceDataLoader")
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
         bases_names =  [base.name() for base in cls.__mro__[::-1] if base not in (ABC, object)]
         for i in range(1, len(bases_names)):
-            cls._registry.add_key(bases_names[i], parent=bases_names[i-1])
+            cls.registry.add_key(bases_names[i], parent=bases_names[i - 1])
 
     @abstractmethod
     def loader(self):
@@ -55,7 +55,7 @@ class PriceDataLoader(ABC):
 
     @classmethod
     def registered(cls):
-        return cls._registry.render_tree()
+        return cls.registry.render_tree()
 
 class _LoaderName:
     __slots__ = ()
@@ -109,7 +109,7 @@ class _CCTX(_LoaderName):
 
     @staticmethod
     def load(data_cfg: CCTXCfg) -> list[DataFrame]:
-        """Loading OHLCV data via CCTX logic."""
+        """Loading OHLCV data via CCTX."""
 
         symbols = data_cfg.symbols
         limit = data_cfg.limit
@@ -124,7 +124,7 @@ class _CCTX(_LoaderName):
                 limit=limit,
                 since=None,
             )
-            df = _create_df_from_raw_array(raw_data)
+            df = _create_df_from_raw_array(raw_data, symbol)
             df_.append(df)
         return df_
 
@@ -150,6 +150,7 @@ class TradingViewLoader(PriceDataLoader):
     """The TradingView OHLCV data loader factory."""
 
     __slots__ = ('loader_params',)
+    PriceDataLoader.registry.add_key("TradingView", "PriceDataLoader")
 
     def __init__(self, *, username: str = None, password: str = None):
         self.loader_params = {
@@ -164,6 +165,7 @@ class CCTXLoader(PriceDataLoader):
     """The CCTX price OHLCV loader factory."""
 
     __slots__ = ()
+    PriceDataLoader.registry.add_key("CCTX", "PriceDataLoader")
 
     def loader(self) -> _CCTX:
         return _CCTX()

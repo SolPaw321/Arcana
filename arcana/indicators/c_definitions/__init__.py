@@ -38,7 +38,7 @@ ma_lib.kama.restype = None
 ma_lib.frama.argtypes = 4*_D_PTR + 2*_I
 ma_lib.frama.restype = None
 
-import numpy as np
+'''import numpy as np
 from arcana.indicators.adapters import ma_prepare_data_to_c
 
 #data = np.array([10,11,12,13,15,20], dtype=np.float64)
@@ -51,4 +51,4 @@ ind = np.zeros_like(close)
 
 res = ma_prepare_data_to_c(to_d_ptr=[close, ind, high, low], to_i=[length, period])
 ma_lib.frama(*res)
-print(ind)
+print(ind)'''

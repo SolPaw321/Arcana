@@ -1,3 +1,4 @@
 from .cfg import CCTXCfg, TradingViewCfg
 from .loader import TradingViewLoader, CCTXLoader, PriceDataLoader
-from .data import PriceData
+from .interface import PriceData
+from .dev_types import PriceDataColumns

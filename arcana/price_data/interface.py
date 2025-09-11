@@ -1,10 +1,11 @@
-from pandas import DataFrame, concat
-from collections.abc import Iterable
+from pandas import DataFrame
 
+from . import PriceDataColumns
 from .loader import PriceDataLoader
 from .cfg import PriceDataCfg
 from arcana.utils.df_utils import stack_data
 from arcana.utils.classes_utils import validate_classes_names
+from arcana.plotter import Plotter
 
 class PriceData:
     """The main obj for handling price data"""
@@ -35,3 +36,14 @@ class PriceData:
     @property
     def data_cfg(self) -> PriceDataCfg:
         return self._data_cfg
+
+    @staticmethod
+    def get_registered_loaders():
+        return PriceDataLoader.registry.all_registered()
+
+    @staticmethod
+    def show_registered_loaders():
+        PriceDataLoader.registry.render_tree()
+
+    def plot(self):
+        plotter = Plotter(rows=1, cols=1, row_heights=[1.0], subplot_titles=self.data_cfg.symbols)
